@@ -42,6 +42,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
     }
+    console.log('🔍 USER FROM DB:', user);
     return user;
   }
 
