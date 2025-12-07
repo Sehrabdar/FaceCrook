@@ -1,15 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { GetCurrentUser } from 'src/auth/getCurrentUser.decorator';
+import { User } from './entities/user.entity';
+import type { Express } from 'express';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  @UseInterceptors(FileInterceptor('avatar'))
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() avatarFile?: Express.Multer.File,
+  ) {
+    if (avatarFile) {
+    createUserDto.avatar = `/uploads/avatars/${avatarFile.filename}`;
+  }
     return this.userService.create(createUserDto);
   }
 
@@ -17,6 +28,18 @@ export class UserController {
   @Get()
   findAll() {
     return this.userService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async updateAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @GetCurrentUser() user: User,
+  ) {
+    const avatarPath = `/uploads/avatars/${file.filename}`;
+    await this.userService.update(user.id, { avatar: avatarPath });
+    return { avatar: avatarPath, message: 'Avatar updated successfully' };
   }
 
   @UseGuards(JwtAuthGuard)
