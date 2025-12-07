@@ -1,5 +1,5 @@
 import { 
-  Controller, Post, Body, Get, Param, UseGuards, 
+  Controller, Post, Body, Get, Param, UseGuards, Req,
   UseInterceptors, UploadedFiles
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -23,23 +23,21 @@ async create(
   @UploadedFiles() files: Express.Multer.File[],
   @GetCurrentUser() user: any,
 ) {
-  console.log('🔍 USER FROM JWT:', user);
+  console.log('🔍 USER (fixed):', user);
   
   const imagePaths = files?.map(file => `/uploads/posts/${file.filename}`) || [];
-  
-  // 🔥 HARDCODE - POSTS WORK IMMEDIATELY!
-  const authorId = 3;  // ← YOUR USER ID FROM DB LOGS!
-  
   const postData = {
     ...createPostDto,
     images: imagePaths,
-    authorId: authorId,  // ✅ 3!
+    authorId: user.id,
   };
   
   console.log('📤 postData:', postData);
   
-  return this.postService.create(postData, authorId);
+  return this.postService.create(postData, user.id);
 }
+
+
 
   @UseGuards(JwtAuthGuard)
   @Get()
