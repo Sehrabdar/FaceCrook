@@ -13,7 +13,7 @@ export class PostService {
     private postRepository: Repository<Post>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createPostDto: CreatePostDto, authorId: string): Promise<Post> {
     const post = this.postRepository.create({
@@ -24,17 +24,19 @@ export class PostService {
   }
 
   async findAll(): Promise<Post[]> {
-    return this.postRepository.find({ 
-      where: {deletedAt: IsNull()},
-      relations: ['author'] });
+    return this.postRepository.find({
+      where: { deletedAt: IsNull() },
+      relations: ['author']
+    });
   }
 
   async findOne(id: string): Promise<Post> {
-    return this.postRepository.findOneOrFail({ 
-      where: { id, 
+    return this.postRepository.findOneOrFail({
+      where: {
+        id,
         deletedAt: IsNull()
-       }, 
-      relations: ['author'] 
+      },
+      relations: ['author']
     });
   }
 }
