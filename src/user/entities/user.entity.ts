@@ -1,34 +1,37 @@
-import { Column, OneToMany, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, OneToMany, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, DeleteDateColumn } from "typeorm";
 
 import { Post } from "src/post/entities/post.entity";
 
 @Entity('user')
 export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id:string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    firstName: string;
+  @Column()
+  firstName: string;
 
-    @Column()
-    lastName: string;
+  @Column()
+  lastName: string;
 
-    
-    @Column({unique: true})
-    email: string;
 
-    @Column()
-    password: string;
+  @Column({ unique: true })
+  email: string;
 
-    @Column({nullable: true})
-    avatar: string;
+  @Column()
+  password: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @Column({ nullable: true })
+  avatar: string;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @OneToMany(() => Post, post => post.author)  
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
+  @OneToMany(() => Post, post => post.author)
   posts: Post[];
 }

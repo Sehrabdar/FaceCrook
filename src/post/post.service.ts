@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -24,12 +24,16 @@ export class PostService {
   }
 
   async findAll(): Promise<Post[]> {
-    return this.postRepository.find({ relations: ['author'] });
+    return this.postRepository.find({ 
+      where: {deletedAt: IsNull()},
+      relations: ['author'] });
   }
 
   async findOne(id: string): Promise<Post> {
     return this.postRepository.findOneOrFail({ 
-      where: { id }, 
+      where: { id, 
+        deletedAt: IsNull()
+       }, 
       relations: ['author'] 
     });
   }

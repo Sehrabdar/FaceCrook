@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,11 +27,13 @@ export class UserService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+    return this.userRepository.find({
+      where: { deletedAt: IsNull() }
+    });
   }
 
   async findOne(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id, deletedAt: IsNull() } });
     if (!user) {
       throw new NotFoundException(`User with ${id} not found`);
     }
@@ -56,7 +58,7 @@ export class UserService {
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.userRepository.delete(id);
+    const result = await this.userRepository.softDelete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`User with Id ${id} not found`);
     }

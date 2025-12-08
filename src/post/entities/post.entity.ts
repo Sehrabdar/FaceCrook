@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, DeleteDateColumn } from 'typeorm';
 
 import { User } from '../../user/entities/user.entity';
 
@@ -11,7 +11,7 @@ export class Post {
   content: string;
 
   @Column('jsonb', { nullable: true })
-  images: string[]; 
+  images: string[];
   @ManyToOne(() => User, user => user.posts)
   author: User;
 
@@ -20,4 +20,7 @@ export class Post {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }
