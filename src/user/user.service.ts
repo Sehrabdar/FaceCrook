@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -57,10 +57,19 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async remove(id: string): Promise<void> {
-    const result = await this.userRepository.softDelete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`User with Id ${id} not found`);
+  async remove(id: string, requestingUserId: string ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { 
+        id, 
+        deletedAt: IsNull() 
+      }
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+    if (user.id !== requestingUserId) {
+      throw new ForbiddenException('Cannot delete other users');
+    }
+    await this.userRepository.softDelete(id);
   }
 }

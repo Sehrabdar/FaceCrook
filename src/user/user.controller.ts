@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, SetMetadata, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Express } from 'express';
 
@@ -8,10 +8,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 import { GetCurrentUser } from '../auth/getCurrentUser.decorator';
 import { User } from './entities/user.entity';
+import { PoliciesGuard } from 'src/policies/policies.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post()
   @UseInterceptors(FileInterceptor('avatar'))
@@ -20,8 +21,8 @@ export class UserController {
     @UploadedFile() avatarFile?: Express.Multer.File,
   ) {
     if (avatarFile) {
-    createUserDto.avatar = `/uploads/avatars/${avatarFile.filename}`;
-  }
+      createUserDto.avatar = `/uploads/avatars/${avatarFile.filename}`;
+    }
     return this.userService.create(createUserDto);
   }
 
@@ -55,9 +56,10 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @SetMetadata('roles', ['owner'])
+  async remove(@Param('id') id: string, @GetCurrentUser() user: any) {
+    return this.userService.remove(id, user.id);
   }
 }

@@ -1,6 +1,5 @@
 import {
-  Controller, Post, Body, Get, Param, UseGuards, Req,
-  UseInterceptors, UploadedFiles
+  Controller, Post, Body, Get, Param, UseGuards, UseInterceptors, UploadedFiles, Delete, SetMetadata, Patch
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
@@ -8,6 +7,8 @@ import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard'
 import { GetCurrentUser } from '../auth/getCurrentUser.decorator';
+import { PoliciesGuard } from 'src/policies/policies.guard';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -40,5 +41,23 @@ export class PostController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.postService.findOne(id);
+  }
+
+  @Delete(':postId')
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @SetMetadata('roles', ['owner'])
+  async remove(@Param('postId') postId: string, @GetCurrentUser() user: any) {
+    return this.postService.remove(postId, user.id);
+  }
+
+  @Patch(':postId')
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
+  @SetMetadata('roles', ['owner'])
+  async update(
+    @Param('postId') postId: string,
+    @Body() updatePostDto: UpdatePostDto,
+    @GetCurrentUser() user: any
+  ) {
+    return this.postService.update(postId, updatePostDto, user.id);
   }
 }
