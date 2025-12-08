@@ -11,7 +11,6 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public'), {
   prefix: '/uploads/',
 });
-  console.log('🚀 Facecrook running on http://localhost:3000');
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
