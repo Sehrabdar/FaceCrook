@@ -1,9 +1,11 @@
 import { Column, OneToMany, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+
 import { Post } from "src/post/entities/post.entity";
+
 @Entity('user')
 export class User {
-    @PrimaryGeneratedColumn()
-    id:number;
+    @PrimaryGeneratedColumn('uuid')
+    id:string;
 
     @Column()
     firstName: string;

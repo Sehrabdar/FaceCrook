@@ -3,10 +3,11 @@ import {
   UseInterceptors, UploadedFiles
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth/jwt-auth.guard';
-import { GetCurrentUser } from 'src/auth/getCurrentUser.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard'
+import { GetCurrentUser } from '../auth/getCurrentUser.decorator';
 
 @Controller('post')
 export class PostController {
@@ -38,6 +39,6 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
+    return this.postService.findOne(id);
   }
 }
